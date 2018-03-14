@@ -12,4 +12,9 @@ defmodule LAB2 do
     {Poison.decode!(resp.body), resp.headers["session"]}
   end
 
+  defp get_body_and_conttype(resp) do
+      {resp.headers.hdrs["content-type"], resp.body}
+  end
+
+
 end
