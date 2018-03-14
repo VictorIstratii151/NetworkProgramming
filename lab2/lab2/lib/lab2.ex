@@ -1,18 +1,15 @@
 defmodule LAB2 do
   @moduledoc """
-  Documentation for LAB2.
+  Documentation for Lab2.
+  Those awful timeouts...
   """
 
-  @doc """
-  Hello world.
+  @service_root "https://desolate-ravine-43301.herokuapp.com"
 
-  ## Examples
+  defp get_urls_and_key do
+    resp = HTTPotion.post(@service_root)
 
-      iex> LAB2.hello
-      :world
-
-  """
-  def hello do
-    :world
+    {Poison.decode!(resp.body), resp.headers["session"]}
   end
+
 end
