@@ -28,3 +28,7 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+config :lab21, orders_url: "https://evil-legacy-service.herokuapp.com/api/v101/orders/"
+config :lab21, categories_url: "https://evil-legacy-service.herokuapp.com/api/v101/categories/"
+config :lab21, secret_key: "55193451-1409-4729-9cd4-7c65d63b8e76"
