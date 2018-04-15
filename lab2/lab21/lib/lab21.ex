@@ -131,6 +131,24 @@ defmodule Lab21 do
     end)
   end
 
+  # PARENTS IS A MAP
+  def map_category_parents(categories) do
+    # parents = %{}
+
+    # for category <- categories do
+    #   [id, _, parent_id] = category
+    #   parents = Map.put(parents, id, find_parents(category, categories, []))
+    # end
+
+    # parents
+
+    Enum.map(categories, fn category ->
+      # can be changed any time
+      [id, _, _] = category
+      {id, find_parents(category, categories, [])}
+    end)
+  end
+
   def find_parents([_, _, ""], categories, parents_list) do
     parents_list
   end
