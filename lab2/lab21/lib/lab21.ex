@@ -1,4 +1,7 @@
 defmodule Lab21 do
+  @moduledoc """
+  This module contains function to fetch, process and store csv data from Evil Legacy API
+  """
   @orders_url Application.fetch_env!(:lab21, :orders_url)
   @categories_url Application.fetch_env!(:lab21, :categories_url)
   @secret_key Application.fetch_env!(:lab21, :secret_key)
@@ -6,6 +9,12 @@ defmodule Lab21 do
   @test_start "2018-04-10"
   @test_end "2018-04-12"
 
+  @doc """
+  Function that fetches the categories via HTTP
+
+  ##Parameters
+    - `:categories`: Atom that specifies that categories should be fetched
+  """
   def fetch_data(:categories) do
     categories =
       case HTTPoison.request(
@@ -25,6 +34,15 @@ defmodule Lab21 do
 
     categories
   end
+
+  @doc """
+  Function that fetches the orders via HTTP for a given time interval
+
+  ##Parameters
+    - `:orders`: Atom specifying that orders should be fetched
+    - `start_date`: String in the format "YYY-MM-DD" that specifies the start of the time interval
+    - `end_date`: String in the format "YYY-MM-DD" that specifies the end of the time interval
+  """
 
   def fetch_data(:orders, start_date, end_date) do
     orders =
@@ -92,6 +110,14 @@ defmodule Lab21 do
     clean_orders
   end
 
+  def get_full_totals_per_category({[id, _, _], []}, order_list) do
+    get_totals(id, order_list, "0")
+  end
+
+  def get_full_totals_per_category({category, parent_id_list}, order_list) do
+  end
+
+  # gets the totals only for one category
   def get_totals(_, order_list, result) when Kernel.length(order_list) < 1 do
     result
   end
@@ -131,17 +157,41 @@ defmodule Lab21 do
     end)
   end
 
+  # temporary function for testing the totals for each category separatedly 
+  def bar() do
+    categories = fetch_data(:categories) |> Lab21.Parsers.decode_csv()
+    {ids, categories} = clean_structure(categories)
+    orders = foo()
+
+    Enum.map(categories, fn [id, name, parent_id] ->
+      {id, get_totals(id, orders, "0")}
+    end)
+  end
+
+  def baz(category_list) do
+    for category <- category_list,
+        {id, _, parent_id} <- category,
+        do: IO.puts(id)
+  end
+
+  def sas do
+    cats = cats()
+    {ids, cats} = clean_structure(cats)
+    cats
+  end
+
+  # ["16", "VR/AR", "14"]
+  # ["24", "Food & Grocery", ""]
+  # ["12", "TV", "11"]
+  def test_parent() do
+    categories = sas()
+    category = ["12", "TV", "11"]
+
+    find_parents(category, categories, [])
+  end
+
   # PARENTS IS A MAP
   def map_category_parents(categories) do
-    # parents = %{}
-
-    # for category <- categories do
-    #   [id, _, parent_id] = category
-    #   parents = Map.put(parents, id, find_parents(category, categories, []))
-    # end
-
-    # parents
-
     Enum.map(categories, fn category ->
       # can be changed any time
       [id, _, _] = category
