@@ -110,14 +110,64 @@ defmodule Lab21 do
     clean_orders
   end
 
-  def get_full_totals_per_category({[id, _, _], []}, order_list) do
-    get_totals(id, order_list, "0")
+  def get_totals_including_parents({[id, _, _], []}, order_list, totals_map) do
+    cond do
+      Map.has_key?(totals_map, id) ->
+        Map.put(totals_map, totals_map[id], totals_map[id] + get_totals(id, order_list))
+
+      true ->
+        Map.put(totals_map, id, get_totals(id, order_list))
+    end
   end
 
-  def get_full_totals_per_category({category, parent_id_list}, order_list) do
+  def get_totals_including_parents({category, parent_id_list}, order_list, totals_map) do
+    updated_values =
+      Enum.map(parent_id_list, fn parent_id ->
+        totals = get_totals(category, order_list)
+
+        cond do
+          Map.has_key?(totals_map, parent_id) ->
+            totals_map[parent_id] + totals
+
+          true ->
+            totals
+        end
+      end)
+
+    append_list_to_map(parent_id_list, updated_values, totals_map)
   end
 
-  # gets the totals only for one category
+  def append_list_to_map([], [], map) do
+    map
+  end
+
+  def append_list_to_map(key_list, value_list, map) do
+    [keys_head | keys_tail] = key_list
+    [values_head | values_tail] = value_list
+
+    cond do
+      Map.has_key?(map, keys_head) ->
+        append_list_to_map(
+          keys_tail,
+          values_tail,
+          Map.put(map, keys_head, map[keys_head] + values_head)
+        )
+
+      true ->
+        append_list_to_map(keys_tail, values_tail, Map.put(map, keys_head, values_head))
+    end
+  end
+
+  @doc """
+  Function that computes the totals for only one category and returns them as a string
+
+  ##Parameters
+   - `category_id`: String containing the category id
+   - `order_list`: List of orders, each order being a list in format `[id, total, category_id, date]`
+   - `initial_result': String that is usually "0"
+  """
+  def get_totals(category_id, order_list, initial_result \\ 0)
+
   def get_totals(_, order_list, result) when Kernel.length(order_list) < 1 do
     result
   end
@@ -190,7 +240,6 @@ defmodule Lab21 do
     find_parents(category, categories, [])
   end
 
-  # PARENTS IS A MAP
   def map_category_parents(categories) do
     Enum.map(categories, fn category ->
       # can be changed any time
