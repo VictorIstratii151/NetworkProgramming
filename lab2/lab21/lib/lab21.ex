@@ -110,7 +110,7 @@ defmodule Lab21 do
     clean_orders
   end
 
-  def get_totals_including_parents({[id, _, _], []}, order_list, totals_map) do
+  def get_totals_including_parents({id, []}, order_list, totals_map) do
     cond do
       Map.has_key?(totals_map, id) ->
         {a, _} = Float.parse(totals_map[id])
