@@ -113,7 +113,14 @@ defmodule Lab21 do
   def get_totals_including_parents({[id, _, _], []}, order_list, totals_map) do
     cond do
       Map.has_key?(totals_map, id) ->
-        Map.put(totals_map, totals_map[id], totals_map[id] + get_totals(id, order_list))
+        {a, _} = Float.parse(totals_map[id])
+        {b, _} = Float.parse(get_totals(id, order_list))
+
+        Map.put(
+          totals_map,
+          totals_map[id],
+          Float.to_string(a + b)
+        )
 
       true ->
         Map.put(totals_map, id, get_totals(id, order_list))
@@ -127,7 +134,9 @@ defmodule Lab21 do
 
         cond do
           Map.has_key?(totals_map, parent_id) ->
-            totals_map[parent_id] + totals
+            {a, _} = Float.parse(totals_map[parent_id])
+            {b, _} = Float.parse(totals)
+            Float.to_string(a + b)
 
           true ->
             totals
@@ -147,10 +156,17 @@ defmodule Lab21 do
 
     cond do
       Map.has_key?(map, keys_head) ->
+        {a, _} = Float.parse(map[keys_head])
+        {b, _} = Float.parse(values_head)
+
         append_list_to_map(
           keys_tail,
           values_tail,
-          Map.put(map, keys_head, map[keys_head] + values_head)
+          Map.put(
+            map,
+            keys_head,
+            Float.to_string(a + b)
+          )
         )
 
       true ->
@@ -166,7 +182,7 @@ defmodule Lab21 do
    - `order_list`: List of orders, each order being a list in format `[id, total, category_id, date]`
    - `initial_result': String that is usually "0"
   """
-  def get_totals(category_id, order_list, initial_result \\ 0)
+  def get_totals(category_id, order_list, initial_result \\ "0")
 
   def get_totals(_, order_list, result) when Kernel.length(order_list) < 1 do
     result
