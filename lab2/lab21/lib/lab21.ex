@@ -73,36 +73,11 @@ defmodule Lab21 do
     fetch_data(:categories) |> Lab21.Parsers.decode_csv()
   end
 
-  # def remove_col_names do
-  #   categories = fetch_data(:categories) |> Lab21.Parsers.decode_csv()
-  #   {col_names, without_col_names} = Keyword.pop_first(categories, :ok)
-  #   without_ok = Keyword.get_values(without_col_names, :ok)
-  # end
-
   # remove keywords from keyword list and get rid of the column names
   def clean_structure(data) do
     {col_names, without_col_names} = Keyword.pop_first(data, :ok)
     {col_names, Keyword.get_values(without_col_names, :ok)}
   end
-
-  # def compute_totals(categories, totals_map) do
-  #   {cat, new_categories} = List.pop_at(categories, 0)
-  #   process_totals(cat, totals_map, categories)
-  #   compute_totals(new_categories, totals_map)
-  # end
-
-  # def process_totals(cat, totals_map, categories) do
-  #   {id, name, parent_id} = cat
-
-  #   case parent_id do
-  #     "" ->
-  #       if Map.has_key?(totals_map, id) do
-  #         Map.put(totals_map, id, totals_map[id] + get_totals(id))
-  #       else
-  #         Map.put_new(totals_map, )
-  #       end
-  #   end
-  # end
 
   def foo do
     orders = ords() |> Lab21.Parsers.decode_csv()
@@ -110,40 +85,91 @@ defmodule Lab21 do
     clean_orders
   end
 
-  def get_totals_including_parents({id, []}, order_list, totals_map) do
-    cond do
-      Map.has_key?(totals_map, id) ->
-        {a, _} = Float.parse(totals_map[id])
-        {b, _} = Float.parse(get_totals(id, order_list))
+  def total_tests() do
+    cats = sas()
+    ords = foo()
 
-        Map.put(
+    # ords = [
+    #   ["", "1", "1", ""]
+    # ]
+
+    cats = map_category_parents(cats)
+
+    IO.inspect(cats)
+    # IO.inspect(ords)
+    Enum.map(ords, fn ord ->
+      IO.inspect(ord)
+    end)
+
+    get_totals_for_all_categories(cats, ords, %{})
+  end
+
+  def get_totals_for_all_categories(categories_with_parents, order_list, totals_map)
+
+  def get_totals_for_all_categories([], order_list, totals_map) do
+    totals_map
+  end
+
+  def get_totals_for_all_categories([head | tail], order_list, totals_map) do
+    # IO.inspect(head)
+
+    get_totals_for_all_categories(
+      tail,
+      order_list,
+      get_totals_including_parents(head, order_list, totals_map)
+    )
+  end
+
+  ######################################
+  def get_totals_including_parents({category_id, []}, order_list, totals_map) do
+    cond do
+      Map.has_key?(totals_map, category_id) ->
+        {a, _} = Float.parse(totals_map[category_id])
+        {b, _} = Float.parse(get_totals(category_id, order_list))
+
+        Map.replace!(
           totals_map,
-          totals_map[id],
+          category_id,
           Float.to_string(a + b)
         )
 
       true ->
-        Map.put(totals_map, id, get_totals(id, order_list))
+        Map.put(totals_map, category_id, get_totals(category_id, order_list))
     end
   end
 
-  def get_totals_including_parents({category, parent_id_list}, order_list, totals_map) do
-    updated_values =
+  def get_totals_including_parents({category_id, parent_id_list}, order_list, totals_map) do
+    totals_for_parents =
       Enum.map(parent_id_list, fn parent_id ->
-        totals = get_totals(category, order_list)
-
-        cond do
-          Map.has_key?(totals_map, parent_id) ->
+        case Map.has_key?(totals_map, parent_id) do
+          true ->
             {a, _} = Float.parse(totals_map[parent_id])
-            {b, _} = Float.parse(totals)
+            {b, _} = Float.parse(get_totals(category_id, order_list))
+
             Float.to_string(a + b)
 
-          true ->
-            totals
+          _ ->
+            get_totals(category_id, order_list)
         end
       end)
 
-    append_list_to_map(parent_id_list, updated_values, totals_map)
+    category_id_value =
+      case Map.has_key?(totals_map, category_id) do
+        true ->
+          {a, _} = Float.parse(totals_map[category_id])
+          {b, _} = Float.parse(get_totals(category_id, order_list))
+
+          Float.to_string(a + b)
+
+        _ ->
+          get_totals(category_id, order_list)
+      end
+
+    append_list_to_map(
+      [category_id | parent_id_list],
+      [category_id_value | totals_for_parents],
+      totals_map
+    )
   end
 
   def append_list_to_map([], [], map) do
@@ -154,24 +180,7 @@ defmodule Lab21 do
     [keys_head | keys_tail] = key_list
     [values_head | values_tail] = value_list
 
-    cond do
-      Map.has_key?(map, keys_head) ->
-        {a, _} = Float.parse(map[keys_head])
-        {b, _} = Float.parse(values_head)
-
-        append_list_to_map(
-          keys_tail,
-          values_tail,
-          Map.put(
-            map,
-            keys_head,
-            Float.to_string(a + b)
-          )
-        )
-
-      true ->
-        append_list_to_map(keys_tail, values_tail, Map.put(map, keys_head, values_head))
-    end
+    append_list_to_map(keys_tail, values_tail, Map.put(map, keys_head, values_head))
   end
 
   @doc """
