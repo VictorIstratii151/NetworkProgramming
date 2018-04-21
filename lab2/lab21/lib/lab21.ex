@@ -75,8 +75,30 @@ defmodule Lab21 do
 
   # remove keywords from keyword list and get rid of the column names
   def clean_structure(data) do
-    {col_names, without_col_names} = Keyword.pop_first(data, :ok)
-    {col_names, Keyword.get_values(without_col_names, :ok)}
+    without_ok = remove_keywords(data)
+    {col_names, without_col_names} = List.pop_at(without_ok, 0)
+  end
+
+  def remove_keywords(data) do
+    Keyword.get_values(data, :ok)
+  end
+
+  def separate_categories do
+    categories = fetch_data(:categories) |> Lab21.Parsers.decode_csv()
+
+    {roots, rest} =
+      Enum.split_with(categories, fn elem ->
+        decision =
+          case elem do
+            {:ok, [_, _, ""]} ->
+              true
+
+            {:ok, _} ->
+              false
+          end
+      end)
+
+    roots
   end
 
   def foo do
@@ -93,15 +115,18 @@ defmodule Lab21 do
     #   ["", "1", "1", ""]
     # ]
 
-    cats = map_category_parents(cats)
+    categories_with_parents = map_category_parents(cats)
 
-    IO.inspect(cats)
+    IO.inspect(categories_with_parents)
     # IO.inspect(ords)
     Enum.map(ords, fn ord ->
       IO.inspect(ord)
     end)
 
-    get_totals_for_all_categories(cats, ords, %{})
+    totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
+  end
+
+  def pretty_print_totals(totals_map, categories_with_parents) do
   end
 
   def get_totals_for_all_categories(categories_with_parents, order_list, totals_map)
@@ -213,23 +238,6 @@ defmodule Lab21 do
       end
 
     get_totals(category_id, new_order_list, new_result)
-  end
-
-  def separate_categories do
-    categories = fetch_data(:categories) |> Lab21.Parsers.decode_csv()
-
-    Enum.split_with(categories, fn elem ->
-      decision =
-        case elem do
-          {:ok, [_, _, ""]} ->
-            true
-
-          {:ok, _} ->
-            false
-        end
-
-      decision
-    end)
   end
 
   # temporary function for testing the totals for each category separatedly 
