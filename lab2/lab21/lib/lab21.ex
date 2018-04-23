@@ -88,10 +88,10 @@ defmodule Lab21 do
       Enum.split_with(categories, fn elem ->
         decision =
           case elem do
-            {:ok, [_, _, ""]} ->
+            [_, _, ""] ->
               true
 
-            {:ok, _} ->
+            _ ->
               false
           end
       end)
@@ -107,73 +107,55 @@ defmodule Lab21 do
     cats = sas()
     ords = foo()
 
-    # ords = [
-    #   ["", "1", "1", ""]
-    # ]
-
     categories_with_parents = map_category_parents(cats)
-    add_tuples_to_list("11", categories_with_parents, [])
+    # add_tuples_to_list("11", categories_with_parents, [])
 
-    # IO.inspect(categories_with_parents)
+    IO.inspect(categories_with_parents)
     # # IO.inspect(ords)
     # Enum.map(ords, fn ord ->
     #   IO.inspect(ord)
     # end)
 
     # totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
+
+    # {roots, children} = separate_categories(cats)
+
+    # roots_with_indented_children_map = root_map_with_children(roots, categories_with_parents, %{})
+
+    # print_all_totals(cats, roots_with_indented_children_map, totals)
+
+    indent_categories(categories_with_parents, [])
   end
 
-  def map_with_lists_from_list([], map) do
-    map
+  def indent_categories(categories_with_parents, list_of_tuples)
+
+  def indent_categories([], list_of_tuples) do
+    list_of_tuples
   end
 
-  def map_with_lists_from_list([head | tail], map) do
-    map_with_lists_from_list(tail, Map.put(map, head, []))
+  def indent_categories([{category_id, parents_list} | tail], list_of_tuples) do
+    cond do
+      Enum.count(parents_list) == 0 ->
+        indent_categories(tail, [{category_id, "", 0} | list_of_tuples])
+
+      true ->
+        indent_categories(tail, [
+          {category_id, List.last(parents_list), Enum.count(parents_list)} | list_of_tuples
+        ])
+    end
   end
 
-  def pretty_print_totals(totals_map, categories_with_parents, categories) do
-    {roots, _} = separate_categories(categories)
-    roots_map = map_with_lists_from_list(roots, %{})
-  end
+  #########################
+  #########################
 
-  def add_tuples_to_list(root_category, categories_with_parents, list)
-
-  def add_tuples_to_list(root_category, [], list) do
-    list |> Enum.uniq() |> Enum.sort(fn {_, x}, {_, y} -> x < y end)
-  end
-
-  def add_tuples_to_list(root_category, [head | tail], tuples_list) do
-    {category_id, parents_list} = head
-
-    new_tuples_list =
-      cond do
-        # root_category == parents_list |> Enum.reverse() |> List.last() ->
-        Enum.any?(parents_list, fn category -> category == root_category end) ->
-          Enum.map(parents_list, fn parent_id ->
-            cond do
-              parent_id != root_category ->
-                {parent_id,
-                 Enum.find_index(parents_list, fn index ->
-                   index == parent_id
-                 end) + 1}
-
-              true ->
-                {category_id, Enum.count(parents_list)}
-            end
-          end)
-
-        true ->
-          tuples_list
-      end
-
-    add_tuples_to_list(root_category, tail, new_tuples_list ++ tuples_list)
-  end
-
-  def indent_children_to_root(root_category, categories_with_parents) do
+  def indent_children_to_root(root_category_id, categories_with_parents) do
     Enum.map(categories_with_parents, fn tuple ->
       nil
     end)
   end
+
+  ############################
+  ############################
 
   def get_totals_for_all_categories(categories_with_parents, order_list, totals_map)
 
