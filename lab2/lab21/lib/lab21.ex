@@ -116,7 +116,7 @@ defmodule Lab21 do
     #   IO.inspect(ord)
     # end)
 
-    # totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
+    totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
 
     # {roots, children} = separate_categories(cats)
 
@@ -124,7 +124,67 @@ defmodule Lab21 do
 
     # print_all_totals(cats, roots_with_indented_children_map, totals)
 
-    indent_categories(categories_with_parents, [])
+    indented_categories = indent_categories(categories_with_parents, [])
+    buffered_categories = add_categories_to_buffer(indented_categories, [])
+
+    print_totals_from_buffer(cats, buffered_categories, totals)
+  end
+
+  ########################################################
+
+  def print_totals_from_buffer(categories, buffer_list, totals_map) do
+    for tuple <- buffer_list do
+      {id, _, indent_index} = tuple
+
+      [_, matched_category_name, _] =
+        Enum.find(categories, fn [category_id, _, _] ->
+          id == category_id
+        end)
+
+      matched_category_totals = totals_map[id]
+
+      print_totals_row(matched_category_name, matched_category_totals, indent_index)
+    end
+
+    :ok
+  end
+
+  def print_totals_row(category_name, category_totals, indent_index) do
+    {float_totals, _} = Float.parse(category_totals)
+
+    IO.puts(
+      String.pad_trailing(String.duplicate(" ", indent_index * 3) <> "*#{category_name}", 25, "_") <>
+        String.pad_leading("#{Float.round(float_totals, 2)}", 10, "_")
+    )
+  end
+
+  def add_categories_to_buffer(indented_categories, buffer_list)
+
+  def add_categories_to_buffer([], buffer_list) do
+    Enum.reverse(buffer_list)
+  end
+
+  def add_categories_to_buffer([{id, "", 0} | tail], buffer_list) do
+    add_categories_to_buffer(tail, buffer_list ++ [{id, "", 0}])
+  end
+
+  def add_categories_to_buffer([head | tail], buffer_list) do
+    {id, print_after_id, indent_index} = head
+
+    case Enum.any?(buffer_list, fn {cat_id, _, _} ->
+           print_after_id == cat_id
+         end) do
+      true ->
+        append_position =
+          Enum.find_index(buffer_list, fn {cat_id, _, _} ->
+            print_after_id == cat_id
+          end)
+
+        add_categories_to_buffer(tail, List.insert_at(buffer_list, append_position, head))
+
+      false ->
+        add_categories_to_buffer(tail ++ [head], buffer_list)
+    end
   end
 
   def indent_categories(categories_with_parents, list_of_tuples)
@@ -143,15 +203,6 @@ defmodule Lab21 do
           {category_id, List.last(parents_list), Enum.count(parents_list)} | list_of_tuples
         ])
     end
-  end
-
-  #########################
-  #########################
-
-  def indent_children_to_root(root_category_id, categories_with_parents) do
-    Enum.map(categories_with_parents, fn tuple ->
-      nil
-    end)
   end
 
   ############################
@@ -268,37 +319,10 @@ defmodule Lab21 do
     get_totals(category_id, new_order_list, new_result)
   end
 
-  # temporary function for testing the totals for each category separatedly 
-  def bar() do
-    categories = fetch_data(:categories) |> Lab21.Parsers.decode_csv()
-    {ids, categories} = clean_structure(categories)
-    orders = foo()
-
-    Enum.map(categories, fn [id, name, parent_id] ->
-      {id, get_totals(id, orders, "0")}
-    end)
-  end
-
-  def baz(category_list) do
-    for category <- category_list,
-        {id, _, parent_id} <- category,
-        do: IO.puts(id)
-  end
-
   def sas do
     cats = cats()
     {ids, cats} = clean_structure(cats)
     cats
-  end
-
-  # ["16", "VR/AR", "14"]
-  # ["24", "Food & Grocery", ""]
-  # ["12", "TV", "11"]
-  def test_parent() do
-    categories = sas()
-    category = ["12", "TV", "11"]
-
-    find_parents(category, categories, [])
   end
 
   def map_category_parents(categories) do
