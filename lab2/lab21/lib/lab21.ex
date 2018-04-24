@@ -70,7 +70,7 @@ defmodule Lab21 do
   end
 
   def cats do
-    fetch_data(:categories) |> Lab21.Parsers.decode_csv()
+    fetch_data(:categories) |> Lab21.Parsers.parse_csv_string()
   end
 
   # remove keywords from keyword list and get rid of the column names
@@ -98,7 +98,7 @@ defmodule Lab21 do
   end
 
   def foo do
-    orders = ords() |> Lab21.Parsers.decode_csv()
+    orders = ords() |> Lab21.Parsers.parse_csv_string()
     {_, clean_orders} = clean_structure(orders)
     clean_orders
   end
@@ -133,29 +133,30 @@ defmodule Lab21 do
   ########################################################
 
   def print_totals_from_buffer(categories, buffer_list, totals_map) do
-    for tuple <- buffer_list do
-      {id, _, indent_index} = tuple
+    data_for_serialization =
+      for tuple <- buffer_list do
+        {id, _, indent_index} = tuple
 
-      [_, matched_category_name, _] =
-        Enum.find(categories, fn [category_id, _, _] ->
-          id == category_id
-        end)
+        [_, matched_category_name, _] =
+          Enum.find(categories, fn [category_id, _, _] ->
+            id == category_id
+          end)
 
-      matched_category_totals = totals_map[id]
+        matched_category_totals = totals_map[id]
 
-      print_totals_row(matched_category_name, matched_category_totals, indent_index)
-    end
+        get_totals_row(matched_category_name, matched_category_totals, indent_index)
+      end
 
-    :ok
+    Enum.map(data_for_serialization, &IO.puts(&1))
+
+    data_for_serialization
   end
 
-  def print_totals_row(category_name, category_totals, indent_index) do
+  def get_totals_row(category_name, category_totals, indent_index) do
     {float_totals, _} = Float.parse(category_totals)
 
-    IO.puts(
-      String.pad_trailing(String.duplicate(" ", indent_index * 3) <> "*#{category_name}", 25, "_") <>
-        String.pad_leading("#{Float.round(float_totals, 2)}", 10, "_")
-    )
+    String.pad_trailing(String.duplicate(" ", indent_index * 3) <> "*#{category_name}", 25, "_") <>
+      String.pad_leading("#{Float.round(float_totals, 2)}", 10, "_")
   end
 
   def add_categories_to_buffer(indented_categories, buffer_list)
