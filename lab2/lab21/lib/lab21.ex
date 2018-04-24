@@ -127,7 +127,7 @@ defmodule Lab21 do
     indented_categories = indent_categories(categories_with_parents, [])
     buffered_categories = add_categories_to_buffer(indented_categories, [])
 
-    print_totals_from_buffer(cats, buffered_categories, totals)
+    print_totals_from_buffer(cats, buffered_categories, totals) |> test_serialization()
   end
 
   ########################################################
@@ -208,6 +208,31 @@ defmodule Lab21 do
 
   ############################
   ############################
+
+  def test_serialization(totals_string_list) do
+    cache_totals(totals_string_list)
+    read_totals_from_file()
+  end
+
+  def cache_totals(totals_string_list) do
+    file = File.open!("serialized_totals.csv", [:write, :utf8])
+    totals_string_list |> Enum.each(&IO.write(file, &1 <> "\n"))
+  end
+
+  def read_totals_from_file() do
+    {:ok, string} = File.read("serialized_totals.csv")
+    listed_totals = string |> String.split("\n")
+
+    cond do
+      Enum.count(listed_totals) != 0 ->
+        Enum.map(listed_totals, &IO.puts(&1))
+
+      true ->
+        IO.puts("No data recently cached.")
+    end
+
+    :ok
+  end
 
   def get_totals_for_all_categories(categories_with_parents, order_list, totals_map)
 
