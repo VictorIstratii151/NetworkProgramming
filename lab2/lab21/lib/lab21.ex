@@ -16,6 +16,7 @@ defmodule Lab21 do
     - `:categories`: Atom that specifies that categories should be fetched
   """
   def fetch_data(:categories) do
+    #
     categories =
       case HTTPoison.request(
              :get,
