@@ -22,3 +22,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 lab21-*.tar
 
+#ignore the csv file from project
+*.csv
