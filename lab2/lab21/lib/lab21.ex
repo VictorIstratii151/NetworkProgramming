@@ -97,15 +97,21 @@ defmodule Lab21 do
       end)
   end
 
-  def foo do
+  def clean_orders do
     orders = ords() |> Lab21.Parsers.parse_csv_string()
     {_, clean_orders} = clean_structure(orders)
     clean_orders
   end
 
+  def clean_categories do
+    cats = cats()
+    {ids, cats} = clean_structure(cats)
+    cats
+  end
+
   def total_tests() do
-    cats = sas()
-    ords = foo()
+    cats = clean_categories()
+    ords = clean_orders()
 
     categories_with_parents = map_category_parents(cats)
     # add_tuples_to_list("11", categories_with_parents, [])
@@ -131,6 +137,39 @@ defmodule Lab21 do
   end
 
   ########################################################
+
+  def concurrency() do
+    fetching_orders = Task.async(fn -> clean_orders() end)
+    orders = Task.await(fetching_orders)
+
+    fetching_categories = Task.async(fn -> clean_categories() end)
+    categories = Task.await(fetching_categories, 30000)
+
+    mapping_categories_with_parents = Task.async(fn -> map_category_parents(categories) end)
+    categories_with_parents = Task.await(mapping_categories_with_parents, 30000)
+
+    getting_totals =
+      Task.async(fn ->
+        get_totals_for_all_categories(
+          categories_with_parents,
+          orders,
+          %{}
+        )
+      end)
+
+    totals = Task.await(getting_totals, 30000)
+
+    indenting_categories = Task.async(fn -> indent_categories(categories_with_parents, []) end)
+    indented_categories = Task.await(indenting_categories, 30000)
+
+    buffering_categories = Task.async(fn -> add_categories_to_buffer(indented_categories, []) end)
+    buffered_categories = Task.await(buffering_categories, 30000)
+
+    printing =
+      Task.async(fn -> print_totals_from_buffer(categories, buffered_categories, totals) end)
+
+    Task.await(printing, 30000)
+  end
 
   def print_totals_from_buffer(categories, buffer_list, totals_map) do
     data_for_serialization =
@@ -224,7 +263,7 @@ defmodule Lab21 do
     listed_totals = string |> String.split("\n")
 
     cond do
-      Enum.count(listed_totals) != 0 ->
+      Enum.count(listed_totals) > 1 ->
         Enum.map(listed_totals, &IO.puts(&1))
 
       true ->
@@ -343,12 +382,6 @@ defmodule Lab21 do
       end
 
     get_totals(category_id, new_order_list, new_result)
-  end
-
-  def sas do
-    cats = cats()
-    {ids, cats} = clean_structure(cats)
-    cats
   end
 
   def map_category_parents(categories) do
