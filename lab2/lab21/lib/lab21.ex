@@ -40,8 +40,8 @@ defmodule Lab21 do
 
   ##Parameters
     - `:orders`: Atom specifying that orders should be fetched
-    - `start_date`: String in the format "YYY-MM-DD" that specifies the start of the time interval
-    - `end_date`: String in the format "YYY-MM-DD" that specifies the end of the time interval
+    - `start_date`: String in the format "YYYY-MM-DD" that specifies the start of the time interval
+    - `end_date`: String in the format "YYYY-MM-DD" that specifies the end of the time interval
   """
 
   def fetch_data(:orders, start_date, end_date) do
@@ -138,9 +138,34 @@ defmodule Lab21 do
 
   ########################################################
 
-  def start_process do
-    pid = spawn(Lab21.TotalsProcessor, :listen, [])
-    send(pid, {self(), @start_date, @end_date})
+  def start_program do
+    read_totals_from_file()
+
+    IO.puts("""
+    Choose an option:
+    1 - Fetch totals for a given time interval
+    2 - Exit program
+    """)
+
+    ans = IO.getn("Which? > ", 1)
+
+    case ans do
+      "1" ->
+        mda = IO.getn("")
+        start_date = IO.gets("Enter the start of interval (YYYY-MM-DD): ") |> String.trim("\n")
+
+        end_date = IO.gets("Enter the end of interval (YYYY-MM-DD): ") |> String.trim("\n")
+
+        start_computations(start_date, end_date)
+
+      "2" ->
+        System.stop(0)
+    end
+  end
+
+  def start_computations(start_date, end_date) do
+    pid = spawn_link(Lab21.TotalsProcessor, :listen, [])
+    send(pid, {self(), start_date, end_date})
   end
 
   def print_totals_from_buffer(categories, buffer_list, totals_map) do
@@ -236,10 +261,11 @@ defmodule Lab21 do
 
     cond do
       Enum.count(listed_totals) > 1 ->
+        IO.puts("\nThe totals from last session:\n")
         Enum.map(listed_totals, &IO.puts(&1))
 
       true ->
-        IO.puts("No data recently cached.")
+        IO.puts("\nNo data recently cached.\n")
     end
 
     :ok
