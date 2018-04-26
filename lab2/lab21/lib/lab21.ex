@@ -16,7 +16,6 @@ defmodule Lab21 do
     - `:categories`: Atom that specifies that categories should be fetched
   """
   def fetch_data(:categories) do
-    #
     categories =
       case HTTPoison.request(
              :get,
@@ -66,7 +65,7 @@ defmodule Lab21 do
     orders
   end
 
-  def ords do
+  def ords(start_date, end_date) do
     fetch_data(:orders, @test_start, @test_end)
   end
 
@@ -98,8 +97,8 @@ defmodule Lab21 do
       end)
   end
 
-  def clean_orders do
-    orders = ords() |> Lab21.Parsers.parse_csv_string()
+  def clean_orders(start_date, end_date) do
+    orders = ords(start_date, end_date) |> Lab21.Parsers.parse_csv_string()
     {_, clean_orders} = clean_structure(orders)
     clean_orders
   end
@@ -110,66 +109,38 @@ defmodule Lab21 do
     cats
   end
 
-  def total_tests() do
-    cats = clean_categories()
-    ords = clean_orders()
+  # def total_tests() do
+  #   cats = clean_categories()
+  #   ords = clean_orders()
 
-    categories_with_parents = map_category_parents(cats)
-    # add_tuples_to_list("11", categories_with_parents, [])
+  #   categories_with_parents = map_category_parents(cats)
+  #   # add_tuples_to_list("11", categories_with_parents, [])
 
-    IO.inspect(categories_with_parents)
-    # # IO.inspect(ords)
-    # Enum.map(ords, fn ord ->
-    #   IO.inspect(ord)
-    # end)
+  #   IO.inspect(categories_with_parents)
+  #   # # IO.inspect(ords)
+  #   # Enum.map(ords, fn ord ->
+  #   #   IO.inspect(ord)
+  #   # end)
 
-    totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
+  #   totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
 
-    # {roots, children} = separate_categories(cats)
+  #   # {roots, children} = separate_categories(cats)
 
-    # roots_with_indented_children_map = root_map_with_children(roots, categories_with_parents, %{})
+  #   # roots_with_indented_children_map = root_map_with_children(roots, categories_with_parents, %{})
 
-    # print_all_totals(cats, roots_with_indented_children_map, totals)
+  #   # print_all_totals(cats, roots_with_indented_children_map, totals)
 
-    indented_categories = indent_categories(categories_with_parents, [])
-    buffered_categories = add_categories_to_buffer(indented_categories, [])
+  #   indented_categories = indent_categories(categories_with_parents, [])
+  #   buffered_categories = add_categories_to_buffer(indented_categories, [])
 
-    print_totals_from_buffer(cats, buffered_categories, totals) |> test_serialization()
-  end
+  #   print_totals_from_buffer(cats, buffered_categories, totals) |> test_serialization()
+  # end
 
   ########################################################
 
-  def concurrency() do
-    fetching_orders = Task.async(fn -> clean_orders() end)
-    orders = Task.await(fetching_orders)
-
-    fetching_categories = Task.async(fn -> clean_categories() end)
-    categories = Task.await(fetching_categories, 30000)
-
-    mapping_categories_with_parents = Task.async(fn -> map_category_parents(categories) end)
-    categories_with_parents = Task.await(mapping_categories_with_parents, 30000)
-
-    getting_totals =
-      Task.async(fn ->
-        get_totals_for_all_categories(
-          categories_with_parents,
-          orders,
-          %{}
-        )
-      end)
-
-    totals = Task.await(getting_totals, 30000)
-
-    indenting_categories = Task.async(fn -> indent_categories(categories_with_parents, []) end)
-    indented_categories = Task.await(indenting_categories, 30000)
-
-    buffering_categories = Task.async(fn -> add_categories_to_buffer(indented_categories, []) end)
-    buffered_categories = Task.await(buffering_categories, 30000)
-
-    printing =
-      Task.async(fn -> print_totals_from_buffer(categories, buffered_categories, totals) end)
-
-    Task.await(printing, 30000)
+  def start_process do
+    pid = spawn(Lab21.TotalsProcessor, :listen, [])
+    send(pid, {self(), @start_date, @end_date})
   end
 
   def print_totals_from_buffer(categories, buffer_list, totals_map) do
