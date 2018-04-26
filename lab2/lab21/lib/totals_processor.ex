@@ -28,6 +28,8 @@ defmodule Lab21.TotalsProcessor do
       categories_with_parents |> Lab21.indent_categories([]) |> Lab21.add_categories_to_buffer([])
 
     IO.puts("Printing totals")
+
     Lab21.print_totals_from_buffer(categories, buffered_categories, totals)
+    |> Lab21.cache_totals()
   end
 end
