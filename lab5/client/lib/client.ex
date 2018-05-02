@@ -22,12 +22,20 @@ defmodule Client do
     IO.gets("\nEnter a command (starts with\"/\")\n") |> String.trim()
   end
 
-  def client_interaction() do
+  def user_interaction() do
     {:ok, pid} = start()
 
     message = user_input()
-
     send_message(pid, message)
+
+    user_interaction(pid)
+  end
+
+  def user_interaction(pid) do
+    message = user_input()
+    send_message(pid, message)
+
+    user_interaction(pid)
   end
 
   def handle_info(:connect, state) do
@@ -44,12 +52,18 @@ defmodule Client do
 
   def handle_info({:tcp, _, data}, state) do
     Logger.info("Received #{data}")
-
     {:noreply, state}
   end
 
-  def handle_info({:tcp_closed, _}, state), do: {:stop, :normal, state}
-  def handle_info({:tcp_error, _}, state), do: {:stop, :normal, state}
+  def handle_info({:tcp_closed, _}, state) do
+    IO.puts("closed")
+    {:stop, :normal, state}
+  end
+
+  def handle_info({:tcp_error, _}, state) do
+    IO.puts("error")
+    {:stop, :normal, state}
+  end
 
   def handle_cast({:message, message}, %{socket: socket} = state) do
     Logger.info("Sending #{message}")
