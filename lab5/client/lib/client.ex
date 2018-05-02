@@ -1,18 +1,7 @@
-defmodule Client do
-  @moduledoc """
-  Documentation for Client.
-  """
+defmodule TcpClient do
+  require Logger
+  use GenServer
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Client.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  @ip {127, 0, 0, 1}
+  @port 8000
 end
