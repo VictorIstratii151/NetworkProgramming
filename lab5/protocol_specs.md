@@ -1,4 +1,4 @@
 #Protocol specification
 
 ###Message Format
-*Messages start with `/`
+*Messages start with
