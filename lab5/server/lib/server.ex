@@ -1,18 +1,6 @@
-defmodule Server do
-  @moduledoc """
-  Documentation for Server.
-  """
+defmodule TcpServer do
+  require Logger
+  use GenServer
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Server.hello
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  @port 8000
 end
