@@ -16,6 +16,17 @@ defmodule Server do
     {:ok, %{state | socket: socket}}
   end
 
+  def parse(line) do
+    case String.split(line) do
+      ["/help"] -> {:ok, print_help()}
+      ["/hello" | tail] -> {:ok, tail}
+      ["/time"] -> {:ok, get_current_time()}
+      ["/random", start_bound, end_bound] -> {:ok, generate_random(start_bound, end_bound)}
+      ["/coinflip"] -> {:ok, coin_flip()}
+      _ -> {:error, :unknown_command}
+    end
+  end
+
   def handle_info(:accept, %{socket: socket} = state) do
     {:ok, _} = :gen_tcp.accept(socket)
 
