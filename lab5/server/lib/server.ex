@@ -26,6 +26,14 @@ defmodule Server do
     """
   end
 
+  def time() do
+    DateTime.utc_now() |> to_string
+  end
+
+  def coin_flip() do
+    Enum.random(0..1)
+  end
+
   def parse(line) do
     case String.split(line) do
       ["/help"] ->
