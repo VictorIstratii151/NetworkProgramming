@@ -18,12 +18,23 @@ defmodule Server do
 
   def parse(line) do
     case String.split(line) do
-      ["/help"] -> {:ok, print_help()}
-      ["/hello" | tail] -> {:ok, tail}
-      ["/time"] -> {:ok, get_current_time()}
-      ["/random", start_bound, end_bound] -> {:ok, generate_random(start_bound, end_bound)}
-      ["/coinflip"] -> {:ok, coin_flip()}
-      _ -> {:error, :unknown_command}
+      ["/help"] ->
+        {:ok, help_message()}
+
+      ["/hello" | tail] ->
+        {:ok, Enum.join(tail, " ")}
+
+      ["/time"] ->
+        {:ok, get_current_time()}
+
+      ["/random", start_bound, end_bound] ->
+        {:ok, generate_random(start_bound, end_bound)}
+
+      ["/coinflip"] ->
+        {:ok, coin_flip()}
+
+      _ ->
+        {:error, :unknown_command}
     end
   end
 
@@ -36,7 +47,16 @@ defmodule Server do
 
   def handle_info({:tcp, socket, data}, state) do
     Logger.info("Received #{data}")
-    Logger.info("Sending it back")
+    Logger.info("Parsing...")
+
+    data =
+      case parse(data) do
+        {:ok, processed_data} ->
+          processed_data
+
+        _ ->
+          "UNKNOWN COMMAND"
+      end
 
     :ok = :gen_tcp.send(socket, data)
 
