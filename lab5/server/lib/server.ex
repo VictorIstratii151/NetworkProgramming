@@ -1,4 +1,4 @@
-defmodule TcpServer do
+defmodule Server do
   require Logger
   use GenServer
 
