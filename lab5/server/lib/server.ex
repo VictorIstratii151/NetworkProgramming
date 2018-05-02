@@ -31,7 +31,7 @@ defmodule Server do
   end
 
   def coin_flip() do
-    Enum.random(0..1)
+    Enum.random(0..1) |> to_string
   end
 
   def generate_random(start_bound, end_bound) do
@@ -50,7 +50,9 @@ defmodule Server do
         {:ok, get_current_time()}
 
       ["/random", start_bound, end_bound] ->
-        {:ok, generate_random(Integer.parse(start_bound), Integer.parse(end_bound))}
+        {st_bd, _} = Integer.parse(start_bound)
+        {en_bd, _} = Integer.parse(end_bound)
+        {:ok, generate_random(st_bd, en_bd)}
 
       ["/coinflip"] ->
         {:ok, coin_flip()}
@@ -79,6 +81,8 @@ defmodule Server do
         _ ->
           "UNKNOWN COMMAND"
       end
+
+    Logger.info("Sending #{data}")
 
     :ok = :gen_tcp.send(socket, data)
 
