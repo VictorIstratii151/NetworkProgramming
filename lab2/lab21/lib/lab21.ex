@@ -109,33 +109,6 @@ defmodule Lab21 do
     cats
   end
 
-  # def total_tests() do
-  #   cats = clean_categories()
-  #   ords = clean_orders()
-
-  #   categories_with_parents = map_category_parents(cats)
-  #   # add_tuples_to_list("11", categories_with_parents, [])
-
-  #   IO.inspect(categories_with_parents)
-  #   # # IO.inspect(ords)
-  #   # Enum.map(ords, fn ord ->
-  #   #   IO.inspect(ord)
-  #   # end)
-
-  #   totals = get_totals_for_all_categories(categories_with_parents, ords, %{})
-
-  #   # {roots, children} = separate_categories(cats)
-
-  #   # roots_with_indented_children_map = root_map_with_children(roots, categories_with_parents, %{})
-
-  #   # print_all_totals(cats, roots_with_indented_children_map, totals)
-
-  #   indented_categories = indent_categories(categories_with_parents, [])
-  #   buffered_categories = add_categories_to_buffer(indented_categories, [])
-
-  #   print_totals_from_buffer(cats, buffered_categories, totals) |> test_serialization()
-  # end
-
   ########################################################
 
   def start_program do
