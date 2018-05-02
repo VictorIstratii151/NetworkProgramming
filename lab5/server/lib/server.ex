@@ -26,7 +26,7 @@ defmodule Server do
     """
   end
 
-  def time() do
+  def get_current_time() do
     DateTime.utc_now() |> to_string
   end
 
