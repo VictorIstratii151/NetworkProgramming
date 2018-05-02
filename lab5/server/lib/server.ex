@@ -34,6 +34,10 @@ defmodule Server do
     Enum.random(0..1)
   end
 
+  def generate_random(start_bound, end_bound) do
+    Enum.random(start_bound, end_bound) |> to_string
+  end
+
   def parse(line) do
     case String.split(line) do
       ["/help"] ->
