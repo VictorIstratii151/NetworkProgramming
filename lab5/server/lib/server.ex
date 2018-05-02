@@ -16,6 +16,16 @@ defmodule Server do
     {:ok, %{state | socket: socket}}
   end
 
+  def help_message() do
+    """
+      Available commands:
+      * /hello 'string' -- returns the message after greeting
+      * /time -- returns the current time
+      * /random 'n1' 'n2' -- returns a random number between n1 and n2
+      * /coinflip -- reuturns 0 or 1
+    """
+  end
+
   def parse(line) do
     case String.split(line) do
       ["/help"] ->
@@ -28,7 +38,7 @@ defmodule Server do
         {:ok, get_current_time()}
 
       ["/random", start_bound, end_bound] ->
-        {:ok, generate_random(start_bound, end_bound)}
+        {:ok, generate_random(Integer.parse(start_bound), Integer.parse(end_bound))}
 
       ["/coinflip"] ->
         {:ok, coin_flip()}
