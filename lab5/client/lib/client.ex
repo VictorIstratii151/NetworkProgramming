@@ -18,6 +18,18 @@ defmodule Client do
     {:ok, state}
   end
 
+  def user_input() do
+    IO.gets("\nEnter a command (starts with\"/\")\n") |> String.trim()
+  end
+
+  def client_interaction() do
+    {:ok, pid} = start()
+
+    message = user_input()
+
+    send_message(pid, message)
+  end
+
   def handle_info(:connect, state) do
     Logger.info("Connecting to #{:inet.ntoa(@ip)}:#{@port}")
 
