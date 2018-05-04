@@ -15,7 +15,7 @@ defmodule Lab21 do
   ##Parameters
     - `:categories`: Atom that specifies that categories should be fetched
   """
-  def fetch_data(:categories) do
+  def fetch_data() do
     categories =
       case HTTPoison.request(
              :get,
@@ -44,7 +44,7 @@ defmodule Lab21 do
     - `end_date`: String in the format "YYYY-MM-DD" that specifies the end of the time interval
   """
 
-  def fetch_data(:orders, start_date, end_date) do
+  def fetch_data(start_date, end_date) do
     orders =
       case HTTPoison.request(
              :get,
@@ -66,11 +66,11 @@ defmodule Lab21 do
   end
 
   def ords(start_date, end_date) do
-    fetch_data(:orders, @test_start, @test_end)
+    fetch_data(@test_start, @test_end)
   end
 
   def cats do
-    fetch_data(:categories) |> Lab21.Parsers.parse_csv_string()
+    fetch_data() |> Lab21.Parsers.parse_csv_string()
   end
 
   # remove keywords from keyword list and get rid of the column names
