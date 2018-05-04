@@ -65,8 +65,12 @@ defmodule Lab21 do
     orders
   end
 
+  @doc """
+  Function for fetching
+  """
+
   def ords(start_date, end_date) do
-    fetch_data(@test_start, @test_end)
+    fetch_data(@test_start, @test_end) |> Lab21.Parsers.parse_csv_string()
   end
 
   def cats do
@@ -98,7 +102,7 @@ defmodule Lab21 do
   end
 
   def clean_orders(start_date, end_date) do
-    orders = ords(start_date, end_date) |> Lab21.Parsers.parse_csv_string()
+    orders = ords(start_date, end_date)
     {_, clean_orders} = clean_structure(orders)
     clean_orders
   end
