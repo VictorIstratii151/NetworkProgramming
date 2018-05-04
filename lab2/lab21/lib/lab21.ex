@@ -66,22 +66,43 @@ defmodule Lab21 do
   end
 
   @doc """
-  Function for fetching
+  Function for fetching and parsing the orders
+
+  ##Parameters
+    - `start_date`: The start of time interval to be fetched
+    - `end_date`: The end of time interval to be fetched
   """
 
   def ords(start_date, end_date) do
     fetch_data(@test_start, @test_end) |> Lab21.Parsers.parse_csv_string()
   end
 
+  @doc """
+  Function for fetching the categories
+  """
+
   def cats do
     fetch_data() |> Lab21.Parsers.parse_csv_string()
   end
 
+  @doc """
+  Function which removes the keywords and CSV column names from the list of fetched data
+
+  ##Parameters
+    - `data`: Whether categories or orders which were parsed into a enumerable
+  """
   # remove keywords from keyword list and get rid of the column names
   def clean_structure(data) do
     without_ok = remove_keywords(data)
     {col_names, without_col_names} = List.pop_at(without_ok, 0)
   end
+
+  @doc """
+  Function that actually removes the keywords from a keyword list
+
+  ##Parameters
+    - `data`: a keyword list, where all keywords are :ok atoms
+  """
 
   def remove_keywords(data) do
     Keyword.get_values(data, :ok)
@@ -101,11 +122,23 @@ defmodule Lab21 do
       end)
   end
 
+  @doc """
+  Function that returns fetched orders with clean structure
+
+  ##Parameters
+    - `start_date`: The start of time interval to be fetched
+    - `end_date`: The end of time interval to be fetched
+  """
+
   def clean_orders(start_date, end_date) do
     orders = ords(start_date, end_date)
     {_, clean_orders} = clean_structure(orders)
     clean_orders
   end
+
+  @doc """
+  Function that returns fetched categories with clean structure
+  """
 
   def clean_categories do
     cats = cats()
@@ -113,7 +146,9 @@ defmodule Lab21 do
     cats
   end
 
-  ########################################################
+  @doc """
+  Entry point to the program. Gives options to compute totals or exit
+  """
 
   def start_program do
     read_totals_from_file()
@@ -140,10 +175,27 @@ defmodule Lab21 do
     end
   end
 
+  @doc """
+  Function that starts a thread for doing all the computations
+
+  ##Parameters
+    - `start_date`: The start of time interval to be fetched
+    - `end_date`: The end of time interval to be fetched
+  """
+
   def start_computations(start_date, end_date) do
     pid = spawn_link(Lab21.TotalsProcessor, :listen, [])
     send(pid, {self(), start_date, end_date})
   end
+
+  @doc """
+  Function that prints the totals from a buffered list
+
+  ##Parameters
+    - `categories`: a list of fetched category items
+    - `buffer_list`: a list with ordered categories  by their hierarchy
+    - `totals_map`: a map containing the totals for each category
+  """
 
   def print_totals_from_buffer(categories, buffer_list, totals_map) do
     data_for_serialization =
@@ -165,12 +217,29 @@ defmodule Lab21 do
     data_for_serialization
   end
 
+  @doc """
+  Function that returns a formatted string with the category name and its totals, along with indentation
+
+  ##Parameters
+    - `category_name`: the name of current category
+    - `category_totals`: the totals for current category
+    - `indent_index`: the indentation index for current category
+  """
+
   def get_totals_row(category_name, category_totals, indent_index) do
     {float_totals, _} = Float.parse(category_totals)
 
     String.pad_trailing(String.duplicate(" ", indent_index * 3) <> "*#{category_name}", 25, "_") <>
       String.pad_leading("#{Float.round(float_totals, 2)}", 10, "_")
   end
+
+  @doc """
+  A function that orders the totals and categories in a correct hierarchical order
+
+  ##Parameters
+    - `indented_categories`: a list of tuples where are situated the categories with their indent. indexes
+    - `buffer_list`: the list where will be stored the tuples in the right order
+  """
 
   def add_categories_to_buffer(indented_categories, buffer_list)
 
@@ -201,6 +270,14 @@ defmodule Lab21 do
     end
   end
 
+  @doc """
+  Function that adds the required indentation index to each category
+
+  ##Parameters
+    - `categories_with_parents`: list of categories together with their parents
+    - `list_of_tuples`: a list with tuples in the form {category_id, last_parent_id, indentation_index} 
+  """
+
   def indent_categories(categories_with_parents, list_of_tuples)
 
   def indent_categories([], list_of_tuples) do
@@ -219,18 +296,21 @@ defmodule Lab21 do
     end
   end
 
-  ############################
-  ############################
+  @doc """
+  Function for writing the totals to a file
 
-  def test_serialization(totals_string_list) do
-    cache_totals(totals_string_list)
-    read_totals_from_file()
-  end
+  ##Parameters
+    - `totals_string_list`: a list of strings, each one containing a category and its totals
+  """
 
   def cache_totals(totals_string_list) do
     file = File.open!("serialized_totals.csv", [:write, :utf8])
     totals_string_list |> Enum.each(&IO.write(file, &1 <> "\n"))
   end
+
+  @doc """
+  Function for reading data from file
+  """
 
   def read_totals_from_file() do
     {:ok, string} = File.read("serialized_totals.csv")
@@ -248,6 +328,15 @@ defmodule Lab21 do
     :ok
   end
 
+  @doc """
+  Function that iterates through all categories and returns the totals for each of them
+
+  ##Parameters
+    - `categories_with_parents`: list of categories together with their parents
+    - `order_list`: the list of fetched orders
+    - `totals_map`: a map where the results are stored
+  """
+
   def get_totals_for_all_categories(categories_with_parents, order_list, totals_map)
 
   def get_totals_for_all_categories([], order_list, totals_map) do
@@ -255,8 +344,6 @@ defmodule Lab21 do
   end
 
   def get_totals_for_all_categories([head | tail], order_list, totals_map) do
-    # IO.inspect(head)
-
     get_totals_for_all_categories(
       tail,
       order_list,
@@ -264,7 +351,17 @@ defmodule Lab21 do
     )
   end
 
-  ######################################
+  @doc """
+  Function that retreives the totals for a given category and appends them to all of its parents
+
+  ##Parameters
+    - `id_parents_tuple`: a tuple that contains the id of a category and a list of its parents
+    - `order_list`: the list of fetched order items
+    - `totals_map`: a map where the results are stored
+  """
+
+  def get_totals_including_parents(id_parents_tuple, order_list, totals_map)
+
   def get_totals_including_parents({category_id, []}, order_list, totals_map) do
     cond do
       Map.has_key?(totals_map, category_id) ->
@@ -316,6 +413,17 @@ defmodule Lab21 do
     )
   end
 
+  @doc """
+  A utility function that puts into a map a list of keys with a list of values
+
+  ##Parameters
+    - `key_list`: a list of map keys
+    - `value_list`: a list of map values
+    - `map`: the map that is going to be updated
+  """
+
+  def append_list_to_map(key_list, value_list, map)
+
   def append_list_to_map([], [], map) do
     map
   end
@@ -328,7 +436,7 @@ defmodule Lab21 do
   end
 
   @doc """
-  Function that computes the totals for only one category and returns them as a string
+  Function that computes the totals for only one category and returns the result as a string
 
   ##Parameters
    - `category_id`: String containing the category id
@@ -359,13 +467,16 @@ defmodule Lab21 do
     get_totals(category_id, new_order_list, new_result)
   end
 
-  def map_category_parents(categories) do
-    Enum.map(categories, fn category ->
-      # can be changed any time
-      [id, _, _] = category
-      {id, find_parents(category, categories, [])}
-    end)
-  end
+  @doc """
+  Function that finds the parents for a category
+
+  ##Parameters
+    - `category`: category item 
+    - `categories`: list of category items
+    - `parents_list`: a list where will be stored the categorys' parents 
+  """
+
+  def find_parents(catregory, categories, parents_list)
 
   def find_parents([_, _, ""], categories, parents_list) do
     parents_list
