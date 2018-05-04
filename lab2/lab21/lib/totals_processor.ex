@@ -1,3 +1,5 @@
+require Logger
+
 defmodule Lab21.TotalsProcessor do
   def listen do
     receive do
@@ -9,17 +11,26 @@ defmodule Lab21.TotalsProcessor do
     listen()
   end
 
+  @doc """
+  Worker function which processes all the data concurrently, caches it and prints it
+
+  #Parameters
+    - `from`: the PID of the caller process
+    - `start_date`: String in the format "YYYY-MM-DD" that specifies the start of the time interval
+    - `end_date`: String in the format "YYYY-MM-DD" that specifies the end of the time interval
+  """
+
   def perform_computations(from, start_date, end_date) do
-    IO.puts("Fetching categories")
+    Logger.info("Fetching categories, please wait.")
     fetching_categories = Task.async(fn -> Lab21.clean_categories() end)
-    IO.puts("Fetching orders")
+    Logger.info("Fetching orders, please wait.")
     fetching_orders = Task.async(fn -> Lab21.clean_orders(start_date, end_date) end)
 
     categories = Task.await(fetching_categories, 30000)
-    IO.puts("Categories fetched")
+    Logger.info("Categories fetched")
 
     orders = Task.await(fetching_orders, 30000)
-    IO.puts("Orders fetched")
+    Logger.info("Orders fetched")
 
     categories_with_parents = Lab21.map_category_parents(categories)
     totals = Lab21.get_totals_for_all_categories(categories_with_parents, orders, %{})
