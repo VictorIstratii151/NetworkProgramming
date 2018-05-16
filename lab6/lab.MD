@@ -6,3 +6,12 @@
 ```
 MTUyNjQ5ODE0NDcwMXxlMTgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAwZVhCbElEcHZibXhwYm1Vc0lEcDFjMlZ5Ym1GdFpTQWlkR2h5WldVaWZRPT0=
 ```
+
+3. Decoded base64 data:
+```
+1526498144701|e1800e80-cb86-4622-8423-f4a233214208|:all|ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAidGhyZWUifQ==
+```
+	- ```1526498144701``` - time in milliseconds representing Wed May 16 2018 19:15:44 UTC
+	- ```e1800e80-cb86-4622-8423-f4a233214208``` - user unique identifier 
+	- ```:all``` - field showing that the packet has to be broadcasted to all created users
+	- ```ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAidGhyZWUifQ==``` - another base64 string that resunts into ```{:type :online, :username "three"}```
