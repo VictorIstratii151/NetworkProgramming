@@ -29,3 +29,27 @@ MTUyNjQ5ODE0NDcwMXxlMTgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAw
 5. Reassemble the packet structure - ``` 1526498144701|e2800e80-cb86-4622-8423-f4a233214208|:all|ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAiZmFrZV91c2VyIn0= ```
 6. Encode this string to base64 - ``` MTUyNjQ5ODE0NDcwMXxlMjgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAwZVhCbElEcHZibXhwYm1Vc0lEcDFjMlZ5Ym1GdFpTQWlabUZyWlY5MWMyVnlJbjA9 ```
 7. Send the packet using Packet Sender; use the destination IP address and port number from the description in WireShark
+
+## Understanding the packets when sending messages
+
+1. The first packet as a base64 string:
+```
+1526505324501|2540a3e4-4d26-40dc-aac1-27f1d9e01c43|e2800e80-cb86-4622-8423-f4a233214208|ezp0eXBlIDpjaGF0LCA6dHh0ICJoZWxsbyB0aGVyZSwgdGhpcyBpcyBhIG1lc3NhZ2VcbiJ9
+```
+2. ``` 2540a3e4-4d26-40dc-aac1-27f1d9e01c43 ``` - UUID of user ``` one ```
+3. ``` e2800e80-cb86-4622-8423-f4a233214208 ``` - UUID of user ``` fake_user ```
+4. ``` ezp0eXBlIDpjaGF0LCA6dHh0ICJoZWxsbyB0aGVyZSwgdGhpcyBpcyBhIG1lc3NhZ2VcbiJ9``` - ```{:type :chat, :txt "hello there, this is a message\n"}```
+
+5. The second packet can be translated just the same, the difference being the data portion - ```{:type :delivered}```
+
+## Sending a message from outside the application
+
+1. Use ```fake_user``` UUID as sender -  ``` e2800e80-cb86-4622-8423-f4a233214208 ```
+2. Use ```one``` UUID as receiver -  ``` 2540a3e4-4d26-40dc-aac1-27f1d9e01c43 ```
+3. Encode a message to base64:
+```{:type :chat, :txt "I AM SENDING A FAKE MESSAGE"}``` - ```ezp0eXBlIDpjaGF0LCA6dHh0ICJJIEFNIFNFTkRJTkcgQSBGQUtFIE1FU1NBR0UifQ==```
+4. Assemble a new base64 packet, using the old time:
+```
+MTUyNjUwNTMyNDUwMXxlMjgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8MjU0MGEzZTQtNGQyNi00MGRjLWFhYzEtMjdmMWQ5ZTAxYzQzfGV6cDBlWEJsSURwamFHRjBMQ0E2ZEhoMElDSkpJRUZOSUZORlRrUkpUa2NnUVNCR1FVdEZJRTFGVTFOQlIwVWlmUT09
+```
+5. Send the message using PacketSender
