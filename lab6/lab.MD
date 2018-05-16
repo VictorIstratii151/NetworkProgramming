@@ -23,9 +23,9 @@ MTUyNjQ5ODE0NDcwMXxlMTgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAw
 ## Registering a User from outside the application
 
 1. Let the time be the same as in the analyzed packet
-2. Change the UUID to be a new unique one, for example e2800e80-cb86-4622-8423-f4a233214208
-3. Create a new username, for example {:type :online, :username "fake_user"}
-4. Encode it to base64 - ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAiZmFrZV91c2VyIn0=
-5. Reassemble the packet structure - 1526498144701|e2800e80-cb86-4622-8423-f4a233214208|:all|ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAiZmFrZV91c2VyIn0=
-6. Encode this string to base64 - MTUyNjQ5ODE0NDcwMXxlMjgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAwZVhCbElEcHZibXhwYm1Vc0lEcDFjMlZ5Ym1GdFpTQWlabUZyWlY5MWMyVnlJbjA9
+2. Change the UUID to be a new unique one, for example ``` e2800e80-cb86-4622-8423-f4a233214208 ```
+3. Create a new username, for example ``` {:type :online, :username "fake_user"} ```
+4. Encode it to base64 - ``` ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAiZmFrZV91c2VyIn0= ```
+5. Reassemble the packet structure - ``` 1526498144701|e2800e80-cb86-4622-8423-f4a233214208|:all|ezp0eXBlIDpvbmxpbmUsIDp1c2VybmFtZSAiZmFrZV91c2VyIn0= ```
+6. Encode this string to base64 - ``` MTUyNjQ5ODE0NDcwMXxlMjgwMGU4MC1jYjg2LTQ2MjItODQyMy1mNGEyMzMyMTQyMDh8OmFsbHxlenAwZVhCbElEcHZibXhwYm1Vc0lEcDFjMlZ5Ym1GdFpTQWlabUZyWlY5MWMyVnlJbjA9 ```
 7. Send the packet using Packet Sender; use the destination IP address and port number from the description in WireShark
